@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Budgeter – interactive prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF5EF;--card:#fff;--ink:#17211C;--mute:#5E6F66;--leaf:#2F9E63;--lime:#D7F26B;--sky:#BFE0FF;--blush:#FFC9BB;--line:#D9E4DB;--shell:#DDE8DF;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101814;--card:#1A261F;--ink:#EAF4EC;--mute:#98AB9F;--leaf:#5FD08B;--lime:#C9E85A;--sky:#2A4A66;--blush:#6A3A30;--line:#2B3A31;--shell:#0A0F0C}}
+*{box-sizing:border-box;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--shell);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:12px}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:13px;color:var(--mute)}
+.bar button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;cursor:pointer}
+.phone{width:100%;max-width:390px;height:780px;max-height:calc(100vh - 70px);background:var(--bg);border-radius:36px;border:8px solid var(--ink);overflow:hidden;display:flex;flex-direction:column;position:relative}
+@media(max-width:480px){body{padding:0}.bar{display:none}.phone{max-height:none;height:100vh;border:0;border-radius:0}}
+main{flex:1;overflow-y:auto;padding:20px 18px 12px}
+.scr{display:none}.scr.on{display:block}
+h1{font-size:26px;font-weight:800;letter-spacing:-.02em}h2{font-size:17px;font-weight:600;margin:18px 0 8px}
+.sub{color:var(--mute);font-size:14px}
+.card{background:var(--card);border-radius:22px;padding:16px;border:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hero{display:flex;flex-direction:column;align-items:center;padding:20px}
+.ring{position:relative;width:170px;height:170px}.ring svg{transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:34px;font-weight:800}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.mini .card{padding:10px;text-align:center;font-size:12px}.mini svg{transform:rotate(-90deg)}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--lime);color:#17211C;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
+.btn{width:100%;font:inherit;font-weight:600;font-size:16px;border:0;border-radius:16px;padding:14px;background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.alt{background:var(--lime);color:#17211C}
+.tx{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+nav{display:flex;border-top:1px solid var(--line);background:var(--card);padding:6px 6px 10px}
+nav button{flex:1;font:inherit;font-size:12px;background:none;border:0;color:var(--mute);padding:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:12px}
+nav button.on{color:var(--ink);font-weight:700}nav button.on i{background:var(--lime);color:#17211C}
+nav i{font-style:normal;font-size:18px;width:44px;height:26px;border-radius:13px;display:flex;align-items:center;justify-content:center}
+.fab{position:absolute;right:18px;bottom:84px;width:58px;height:58px;border-radius:20px;border:0;background:var(--leaf);color:#fff;font-size:30px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .15s}
+.fab:active{transform:scale(.9)}
+.sheet{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:5}.sheet.on{display:flex}
+.sheet>div{background:var(--bg);width:100%;border-radius:28px 28px 0 0;padding:18px;animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.amt{font-size:44px;font-weight:800;text-align:center;margin:6px 0}
+.cats,.keys{display:grid;gap:8px;margin:10px 0}.cats{grid-template-columns:repeat(3,1fr)}.keys{grid-template-columns:repeat(3,1fr)}
+.cats button,.keys button{font:inherit;font-size:15px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:11px 4px;cursor:pointer}
+.keys button{font-size:20px;padding:9px}.cats button.on{background:var(--lime);color:#17211C;border-color:var(--lime);font-weight:600}
+.toast{position:absolute;left:50%;top:16px;transform:translate(-50%,-90px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;transition:transform .3s;z-index:9;white-space:nowrap}.toast.on{transform:translate(-50%,0)}
+.lesson{min-height:330px;display:flex;flex-direction:column;gap:12px;background:var(--sky);color:#17211C;border:0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lesson{color:#EAF4EC}}
+.lesson h3{font-size:22px;line-height:1.15}
+input[type=range]{width:100%;accent-color:var(--leaf)}
+.big{font-size:34px;font-weight:800}
+.opt{display:block;width:100%;text-align:left;font:inherit;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer}
+.opt.ok{background:var(--lime);color:#17211C;border-color:var(--lime)}.opt.no{background:var(--blush);color:var(--ink)}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0}.dots span{width:8px;height:8px;border-radius:8px;background:var(--line)}.dots span.on{background:var(--leaf);width:22px}
+.bar2{height:12px;border-radius:12px;background:var(--line);overflow:hidden}.bar2 div{height:100%;background:var(--leaf);transition:width .4s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<div class="bar"><span>Budgeter prototype</span><button id="rs">Reset</button></div>
+<div class="phone" id="app">
+<div class="toast" id="toast"></div>
+<main>
+<section class="scr on" id="s-home">
+ <div class="row"><div><h1>Hey, Le</h1><p class="sub">You’re on track this week.</p></div><span class="chip">🔥 <span id="streak">6</span>-day streak</span></div>
+ <div class="card hero" style="margin-top:16px"><div class="ring"><svg width="170" height="170"><circle cx="85" cy="85" r="72" fill="none" stroke="var(--line)" stroke-width="16"/><circle id="mr" cx="85" cy="85" r="72" fill="none" stroke="var(--leaf)" stroke-width="16" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452" style="transition:stroke-dashoffset .6s"/></svg><div class="c"><b id="left">$0</b><span class="sub">left this month</span></div></div>
+ <p class="sub" id="pace" style="margin-top:10px"></p></div>
+ <div class="mini" id="mini"></div>
+ <h2>Today</h2><div class="card" id="txs" style="padding:4px 16px"></div>
+ <div id="sync"></div>
+</section>
+<section class="scr" id="s-learn">
+ <h1>60-second lesson</h1><p class="sub">Swipe through. Tap to try.</p>
+ <div class="dots" id="dots"></div><div class="card lesson" id="lesson"></div>
+ <div class="row" style="margin-top:12px"><button class="btn" style="width:auto;padding:12px 20px;background:var(--card);color:var(--ink);border:1px solid var(--line)" onclick="go(-1)">Back</button><button class="btn alt" style="width:auto;padding:12px 28px" onclick="go(1)">Next</button></div>
+</section>
+<section class="scr" id="s-goals">
+ <h1>Emergency fund</h1><p class="sub">Your plant grows as you save.</p>
+ <div class="card" style="margin-top:14px;text-align:center"><svg id="plant" width="220" height="220" viewBox="0 0 220 220"></svg>
+ <b class="big" id="gv"></b><p class="sub" id="gs"></p><div class="bar2" style="margin:12px 0"><div id="gb"></div></div>
+ <div class="row"><button class="btn" onclick="save(10)">+ $10</button><button class="btn alt" onclick="save(50)">+ $50</button></div></div>
+ <h2>Milestones</h2><div class="card" id="ms"></div>
+</section>
+<section class="scr" id="s-debt">
+ <h1>Student loan</h1><p class="sub">See how small extras change the finish line.</p>
+ <div class="card" style="margin-top:14px"><div class="row"><span class="sub">Balance</span><b>$4,200 at 5%</b></div>
+ <h2>Extra per month: <span id="ex">$0</span></h2><input type="range" id="exs" min="0" max="300" step="10" value="0">
+ <p class="big" id="mo" style="margin-top:12px"></p><p class="sub" id="sv"></p></div>
+</section>
+</main>
+<button class="fab" id="fab" aria-label="Quick add">+</button>
+<nav id="nav"><button class="on" data-s="home"><i>◔</i>Home</button><button data-s="learn"><i>✦</i>Learn</button><button data-s="goals"><i>❀</i>Goals</button><button data-s="debt"><i>↘</i>Debt</button></nav>
+<div class="sheet" id="sheet"><div>
+ <div class="row"><b>Quick add</b><button class="opt" style="width:auto;margin:0;padding:6px 12px" id="x">Close</button></div>
+ <div class="amt" id="amt">$0</div>
+ <div class="cats" id="cats"></div><div class="keys" id="keys"></div>
+ <button class="btn alt" id="log">Log it</button></div></div>
+<div class="sheet" id="lsheet"><div id="lbody"></div></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const init=()=>({cats:{Food:{b:200,s:120,i:"🍜"},Fun:{b:100,s:60,i:"🎟"},Transit:{b:80,s:45,i:"🚌"}},tx:[{n:"Coffee",c:"Food",a:4.5}],streak:6,goal:640,li:0,linked:false,pending:[]});
+let S=init(),amt="",cat="Food",done={};
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)}
+function ring(p,r,w,c){const L=2*Math.PI*r;return `<circle cx="${r+w}" cy="${r+w}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/><circle cx="${r+w}" cy="${r+w}" r="${r}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L*(1-Math.min(p,1))}"/>`}
+function home(){const k=Object.entries(S.cats);const B=k.reduce((a,[,v])=>a+v.b,0),T=k.reduce((a,[,v])=>a+v.s,0);
+ $("#left").textContent="$"+Math.max(0,Math.round(B-T));$("#mr").style.strokeDashoffset=452*(1-Math.min(T/B,1));
+ $("#pace").textContent=T/B<.75?"Nice pace. Day 17 of 30, "+Math.round(T/B*100)+"% spent.":"Heads up: "+Math.round(T/B*100)+"% spent. Ease off for a few days.";
+ $("#mini").innerHTML=k.map(([n,v])=>{const p=v.s/v.b;return `<div class="card"><svg width="56" height="56">${ring(p,22,6,p>.9?"#E5654B":"var(--leaf)")}</svg><br>${v.i} ${n}<br><b>$${Math.round(v.b-v.s)}</b> left</div>`}).join("");
+ $("#txs").innerHTML=S.tx.slice(0,5).map(t=>`<div class="tx"><span>${S.cats[t.c].i} ${t.n}</span><b>−$${t.a.toFixed(2)}</b></div>`).join("")+`<div class="tx" style="border:0"><span class="sub">Lunch</span><b>−$11.20</b></div>`;
+ $("#streak").textContent=S.streak}
+const lessons=[
+ {t:"Compound interest",d:"Small money, early, gets help from time. Drag to see $50 a month at 7%.",k:"slider"},
+ {t:"Credit utilization",d:"Quick quiz: your card limit is $1,000. What balance keeps your score healthiest?",k:"quiz",o:["$900","$600","$250"],a:2,w:"Staying under 30% of your limit ($300) is the common rule of thumb."},
+ {t:"Pay yourself first",d:"Move savings the day money lands, then spend what’s left. Which is easier to keep up?",k:"quiz",o:["Save what’s left at month end","Auto-save $20 on payday"],a:1,w:"Automatic beats willpower. Tiny and consistent wins."}];
+function lesson(){const L=lessons[S.li];$("#dots").innerHTML=lessons.map((_,i)=>`<span class="${i==S.li?"on":""}"></span>`).join("");let h=`<h3>${L.t}</h3><p>${L.d}</p>`;
+ if(L.k=="slider")h+=`<input type="range" id="yr" min="1" max="40" value="10"><div class="big" id="cv"></div><p id="cs"></p>`;
+ else h+=L.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")+`<p id="fb"></p>`;
+ $("#lesson").innerHTML=h;
+ if(L.k=="slider"){const u=()=>{const y=+$("#yr").value,r=.07/12,n=y*12,v=50*((Math.pow(1+r,n)-1)/r);$("#cv").textContent="$"+Math.round(v).toLocaleString();$("#cs").textContent=`After ${y} years. You put in $${(50*n).toLocaleString()}; time added $${Math.round(v-50*n).toLocaleString()}.`};$("#yr").oninput=u;u()}
+ else document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const ok=+b.dataset.i==L.a;b.classList.add(ok?"ok":"no");$("#fb").textContent=(ok?"Right. ":"Not quite. ")+L.w;if(ok&&!done[S.li]){done[S.li]=1;toast("+10 XP")}})}
+function go(d){S.li=(S.li+d+lessons.length)%lessons.length;lesson()}
+function plant(){const p=Math.min(S.goal/1000,1),h=20+p*110;let l="";[.2,.4,.6,.8,1].forEach((t,i)=>{if(p>=t*.95-.1){const y=190-h*(.25+i*.18),s=i%2?1:-1;l+=`<ellipse cx="${110+s*20}" cy="${y}" rx="${16+i*2}" ry="8" fill="#2F9E63" transform="rotate(${s*-25} ${110+s*20} ${y})"/>`}});
+ $("#plant").innerHTML=`<path d="M80 190h60l-8 28H88z" fill="#E59A7B"/><line x1="110" y1="190" x2="110" y2="${190-h}" stroke="#2F9E63" stroke-width="6" stroke-linecap="round"/>${l}${p>=1?'<circle cx="110" cy="'+(190-h-8)+'" r="12" fill="#FF9EB5"/>':''}`;
+ $("#gv").textContent="$"+S.goal.toLocaleString();$("#gs").textContent="of $1,000 starter fund";$("#gb").style.width=p*100+"%";
+ $("#ms").innerHTML=[[250,"Sprout"],[500,"Seedling"],[750,"Bloom"],[1000,"Fully grown"]].map(([a,n])=>`<div class="tx"><span>${S.goal>=a?"✅":"⬜"} ${n}</span><span class="sub">$${a}</span></div>`).join("")}
+function save(a){const b=S.goal;S.goal=Math.min(1000,S.goal+a);plant();[250,500,750,1000].forEach(m=>{if(b<m&&S.goal>=m)toast("Milestone reached: $"+m)});if(navigator.vibrate)navigator.vibrate(15)}
+function debt(){const e=+$("#exs").value;$("#ex").textContent="$"+e;const calc=x=>{let b=4200,m=0;while(b>0&&m<600){b=b*(1+.05/12)-(90+x);m++}return m},m=calc(e),m0=calc(0);
+ $("#mo").textContent=Math.floor(m/12)+" yr "+m%12+" mo";const si=Math.round(m0-m);$("#sv").textContent=e?`${si} months sooner than the minimum payment.`:"At the $90 minimum. Slide to speed up."}
+function show(s){document.querySelectorAll(".scr").forEach(e=>e.classList.toggle("on",e.id=="s-"+s));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.s==s));$("#fab").style.display=s=="home"?"block":"none";$("main").scrollTop=0}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>show(b.dataset.s));
+function sheetUI(){$("#amt").textContent="$"+(amt||"0");$("#cats").innerHTML=Object.keys(S.cats).map(c=>`<button class="${c==cat?"on":""}" data-c="${c}">${S.cats[c].i} ${c}</button>`).join("");document.querySelectorAll("#cats button").forEach(b=>b.onclick=()=>{cat=b.dataset.c;sheetUI()})}
+$("#keys").innerHTML=[1,2,3,4,5,6,7,8,9,".",0,"⌫"].map(k=>`<button>${k}</button>`).join("");
+document.querySelectorAll("#keys button").forEach(b=>b.onclick=()=>{const k=b.textContent;if(k=="⌫")amt=amt.slice(0,-1);else if(amt.length<6&&!(k=="."&&amt.includes(".")))amt+=k;sheetUI()});
+$("#fab").onclick=()=>{amt="";sheetUI();$("#sheet").classList.add("on")};$("#x").onclick=()=>$("#sheet").classList.remove("on");
+$("#log").onclick=()=>{const a=parseFloat(amt);if(!a){toast("Enter an amount first");return}S.cats[cat].s+=a;S.tx.unshift({n:"Quick add",c:cat,a});S.streak++;$("#sheet").classList.remove("on");home();toast("Logged $"+a.toFixed(2)+" to "+cat);if(navigator.vibrate)navigator.vibrate(20)};
+$("#exs").oninput=debt;
+$("#rs").onclick=()=>{S=init();done={};home();lesson();plant();show("home")};
+const BANKS=["Northside Bank","Campus Credit Union","Everyday Bank"];
+const FEED=[["Campus Café","Food",6.25],["Metro card","Transit",20],["Noodle House","Food",14.8],["Cinema","Fun",12],["Corner Shop 4",null,9.4]];
+function sync(){const p=S.pending;let h="";
+ if(!S.linked)h=`<button class="btn" style="margin-top:12px" onclick="openLink()">Link your bank</button><p class="sub" style="text-align:center;margin-top:6px">Purchases log themselves. Read-only access.</p>`;
+ else{h=`<div class="card row" style="margin-top:12px"><span>🔒 ${S.bank}, synced just now</span><button class="opt" style="width:auto;margin:0;padding:6px 10px" onclick="newBuy()">Simulate purchase</button></div>`;
+ p.forEach((t,i)=>{h+=`<div class="card" style="margin-top:10px"><b>${t.n}, $${t.a.toFixed(2)}</b><p class="sub">New purchase. Where does it go?</p><div class="cats">${Object.keys(S.cats).map(c=>`<button data-i="${i}" data-c="${c}">${S.cats[c].i} ${c}</button>`).join("")}</div></div>`})}
+ $("#sync").innerHTML=h;
+ document.querySelectorAll("#sync .cats button").forEach(b=>b.onclick=()=>{const t=S.pending.splice(+b.dataset.i,1)[0];S.cats[b.dataset.c].s+=t.a;S.tx.unshift({n:t.n,c:b.dataset.c,a:t.a});home();toast("Sorted into "+b.dataset.c)})}
+function newBuy(){const f=FEED[Math.floor(Math.random()*FEED.length)];
+ if(f[1]){S.cats[f[1]].s+=f[2];S.tx.unshift({n:f[0],c:f[1],a:f[2]});home();toast("Synced and sorted: "+f[0])}
+ else{S.pending.push({n:f[0],a:f[2]});home();toast("New purchase synced: "+f[0])}}
+function openLink(){$("#lsheet").classList.add("on");lstep(0)}
+function lstep(n,b){const e=$("#lbody");
+ if(n==0)e.innerHTML=`<b>Choose your bank</b><p class="sub">Budgeter gets read-only access. It can’t move money.</p>`+BANKS.map(x=>`<button class="opt" onclick="lstep(1,'${x}')">🏦 ${x}</button>`).join("")+`<button class="opt" onclick="$('#lsheet').classList.remove('on')">Not now</button>`;
+ if(n==1){e.innerHTML=`<b>Connecting to ${b}…</b><div class="bar2" style="margin:16px 0"><div id="lp" style="width:0"></div></div><p class="sub">Encrypted. You can disconnect anytime.</p>`;setTimeout(()=>{$("#lp").style.width="100%"},50);setTimeout(()=>lstep(2,b),1500)}
+ if(n==2){S.linked=true;S.bank=b;FEED.slice(0,4).forEach(f=>{S.cats[f[1]].s+=f[2];S.tx.unshift({n:f[0],c:f[1],a:f[2]})});S.pending=[{n:"Corner Shop 4",a:9.4}];e.innerHTML=`<b>You’re connected</b><p class="sub">We found 5 recent purchases. 4 were sorted for you. 1 needs a quick tap.</p><button class="btn alt" onclick="$('#lsheet').classList.remove('on');home();toast('Auto-sync is on')">See my dashboard</button>`}}
+const _h=home;home=function(){_h();sync()};
+home();lesson();plant();debt();show("home");
+</script></body></html>
